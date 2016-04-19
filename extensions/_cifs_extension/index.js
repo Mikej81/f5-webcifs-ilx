@@ -72,12 +72,12 @@ app.get('*', function (req, res) {
       	var tmp_share = '/' + sharePath;
       	//ADD Better math for share path length...
       	var strip_path = options_dec.substr(tmp_share.length);
+      	var flip_path = strip_path.replace(/\//g, "");
 
-      	//console.log('ShareLen: ' + share_len);
-      	//console.log('URILen: ' + uri_len);
-      	console.log('Stripped: ' + strip_path);
+      	console.log("FLIPPED: " + flip_path);
+
       	//Need to add ability to read multiple levels deep, cant get format right...
-        smb2Client.readdir('', function(err, files) {
+        smb2Client.readdir(flip_path, function(err, files) {
 
         	http_resp += '<tr><td><a href="/">..</a></td></tr>';
     
