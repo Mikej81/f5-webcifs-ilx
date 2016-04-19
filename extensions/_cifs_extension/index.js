@@ -44,12 +44,15 @@ app.get('*', function (req, res) {
          username: shareUser,
          password: sharePass
         });
-	var http_resp = "<html><head><style>body { background-color: black; color: white; } div { border: 2px solid #66b3ff; padding: 10px 40px; width: 50%";
-	    http_resp += "background: #000000; border-radius: 15px; font-size: 16px; } table { border: 2px solid #33ccff; padding: 10px 40px; float: left; width: 50%";
-	    http_resp += "background: #000000; border-radius: 15px; font-size: 16px;} a { color: white; }</style></head>";
+	var http_resp = "<html><head><style> body { background-color: black; color: white; } ";
+		//http_resp += "div { border: 2px solid #66b3ff; padding: 10px 40px; width: 50%; background: #000000; border-radius: 15px; font-size: 16px; } ";
+		http_resp += "table { border: 2px solid #33ccff; padding: 10px 40px; float: left; width: 50%; background: #000000; border-radius: 15px; font-size: 16px; } ";
+	    http_resp += "a { color: white; } ";
+	    http_resp += "tr.border_bottom td { border-bottom: 2pt solid #66b3ff; }</style></head>";
 
-	    http_resp += "<body><div><b>Webified CIFS</b></div><br><br>";
-        http_resp += "<table><tr><td>File Upload<br><br>";
+	    http_resp += "<body>";
+        http_resp += "<table><tr class='border_bottom'><td>CIFS://" + shareHost + "/" + sharePath + "</td></tr>";
+        http_resp += "<tr class='border_bottom'><td>File Upload<br><br>";
     if (req.query.file != null && req.query.uploadstatus != null) {
     	var httpfilename = decodeURIComponent(req.query.file);
     	var httpuploadstatus = decodeURIComponent(req.query.uploadstatus);
@@ -57,8 +60,8 @@ app.get('*', function (req, res) {
     	http_resp += "<b>Filename: </b>" + httpfilename + "<br></div><br>";
     }
     http_resp += "<form method='post' enctype='multipart/form-data'><input type='file' name='file' accept='*'><input type='submit'></form>";
-    http_resp += "</td></tr><tr><td>Directory Listing</td></tr>";
-    http_resp += '<tr><td>Name</td><td></td></tr>';
+    http_resp += "</td></tr><tr class='border_bottom'><td>Directory Listing</td></tr>";
+    //http_resp += '<tr><td>Name</td><td></td></tr>';
     
     try {
         smb2Client.readdir('', function(err, files) {
@@ -68,7 +71,7 @@ app.get('*', function (req, res) {
           http_resp += '<tr><td><a href="/share/' + files[i] + '">' + files[i] + '</a></td></tr>';
       }
       }
-        http_resp += '</table>';
+        http_resp += '</table></body></html>';
         res.send(http_resp);
       });
     } catch(e){
