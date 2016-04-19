@@ -10,7 +10,9 @@ Currently supports SMB2:ReadDir, SMB2:ReadFile, SMB2:WriteFile
 ##TODO:
 -NFS Support?
 
--MkDir, Rename, 
+-MkDir, 
+
+-Rename, 
 
 -additional error handling, 
 
