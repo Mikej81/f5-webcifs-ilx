@@ -45,11 +45,9 @@ app.get('*', function (req, res) {
          password: sharePass
         });
 	var http_resp = "<html><head><style> body { background-color: black; color: white; } ";
-		//http_resp += "div { border: 2px solid #66b3ff; padding: 10px 40px; width: 50%; background: #000000; border-radius: 15px; font-size: 16px; } ";
 		http_resp += "table { border: 2px solid #33ccff; padding: 10px 40px; float: left; width: 50%; background: #000000; border-radius: 15px; font-size: 16px; } ";
 	    http_resp += "a { color: white; } ";
 	    http_resp += "tr.border_bottom td { border-bottom: 2pt solid #66b3ff; }</style></head>";
-
 	    http_resp += "<body>";
         http_resp += "<table><tr class='border_bottom'><td>CIFS://" + shareHost + "/" + sharePath + "</td></tr>";
         http_resp += "<tr class='border_bottom'><td>File Upload<br><br>";
@@ -74,7 +72,6 @@ app.get('*', function (req, res) {
       	var strip_path = options_dec.substr(tmp_share.length);
       	var flip_path = strip_path.replace(/\//g, "");
 
-      	console.log("FLIPPED: " + flip_path);
 
       	//Need to add ability to read multiple levels deep, cant get format right...
         smb2Client.readdir(flip_path, function(err, files) {
