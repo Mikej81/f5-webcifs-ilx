@@ -64,7 +64,22 @@ app.get('*', function (req, res) {
     //http_resp += '<tr><td>Name</td><td></td></tr>';
     
     try {
+    	var options = req.url;
+      	var options_dec = decodeURIComponent(options);
+
+      	var share_len = sharePath.length;
+      	var uri_len = options_dec.length;
+      	var tmp_share = '/' + sharePath;
+      	//ADD Better math for share path length...
+      	var strip_path = options_dec.substr(tmp_share.length);
+
+      	//console.log('ShareLen: ' + share_len);
+      	//console.log('URILen: ' + uri_len);
+      	console.log('Stripped: ' + strip_path);
+      	//Need to add ability to read multiple levels deep, cant get format right...
         smb2Client.readdir('', function(err, files) {
+
+        	http_resp += '<tr><td><a href="/">..</a></td></tr>';
     
     for (var i = 0, len = files.length; i < len; i++) {
       if (files[i] !== null) {
