@@ -14,4 +14,4 @@ Currently supports SMB2:ReadDir, SMB2:ReadFile, SMB2:WriteFile
 
 -additional error handling, 
 
--multi level path support.
+-multi level path support. (currently supports 1 path deep and back to top options.)
