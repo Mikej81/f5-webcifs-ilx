@@ -7,4 +7,5 @@ Currently supports SMB2:ReadDir, SMB2:ReadFile, SMB2:WriteFile
 
 TODO:
 -NFS Support?
--MkDir, Delete, additional error handling, multi level path support.
+-MkDir, Rename, additional error handling, 
+-multi level path support.
