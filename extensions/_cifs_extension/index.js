@@ -3,6 +3,9 @@ var app = express();
 var server = require('http').Server(app);
 var SMB2 = require('smb2');
 var multer = require('multer');
+var bcdDate = require('bcd-date');
+var Int64BE = require("int64-buffer").Int64BE;
+var Uint64BE = require("int64-buffer").Uint64BE;
 var storage = multer.memoryStorage();
 var upload = multer({ storage: storage });
 
@@ -94,11 +97,24 @@ app.get('*', function (req, res) {
     
     for (var i = 0, len = files.length; i < len; i++) {
       if (files[i] !== null) {
-      	if (/(?=\w+\.\w{3,4}$).+/.test(files[i])) {
-          http_resp += '<tr><td><a href="?share=' + sharePath + '&path=' + flip_path + '&filename=' + files[i] + '">' + files[i] + '</a></td></tr>';
-      	} else {
-      		http_resp += '<tr><td><a href="?share=' + sharePath + '&path=' + flip_path + '/' + files[i] + '">[ ' + files[i] + ' ]</a></td></tr>';
-      	}
+      	if (/(?=\w+\.\w{3,4}$).+/.test(files[i]) || files[i].FileAttributes.toString(16) !== '10') {
+          var sizebuffer = new Buffer(files[i].AllocationSize);
+          var big = new Uint64BE(sizebuffer); // a big number with 64 bits 
+          console.log(big);
+          var filedec = parseInt(big.toNumber(), 2);
+          var filestr = big.toString(16); 
+          console.log(filedec);
+          console.log(filestr);
+
+          http_resp += '<tr><td><a href="?share=' + sharePath + '&path=' + flip_path + '&filename=' + files[i].Filename + '">' + files[i].Filename + '</a></td></tr>';
+      	  //console.log(files[i].Filename + ' : ' + files[i].FileAttributes.toString(16));
+          //console.log(files[i].Filename + ' : ' + files[i].FileAttributes.toString(16));
+        } else {
+          if ((files[i].Filename.indexOf('.') || files[i].Filename.indexOf('..')) && files[i].Filename.length > 2) {
+      		http_resp += '<tr><td><a href="?share=' + sharePath + '&path=' + flip_path + '/' + files[i].Filename + '">[ ' + files[i].Filename + ' ]</a></td></tr>';
+      	  //console.log(files[i].FileAttributes.toString(16));
+        }
+        }
       }
       }
         http_resp += '</table></body></html>';

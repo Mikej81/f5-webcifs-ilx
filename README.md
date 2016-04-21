@@ -7,6 +7,9 @@ F5 BIG-IP iRulesLX (Unsupported) Project for Webified CIFS Shares.
 
 Currently supports SMB2:ReadDir, SMB2:ReadFile, SMB2:WriteFile
 
+Modified SMB2 Library to allow additional file attriute return for SMB2::READDIR
+-Currently able to return FILE_ATTRIBUTES to determine FILE VS Directory.
+
 ##TODO:
 -NFS Support?
 
@@ -16,4 +19,4 @@ Currently supports SMB2:ReadDir, SMB2:ReadFile, SMB2:WriteFile
 
 -additional error handling, 
 
--multi level path support. (currently supports 1 path deep and back to top options.)
+-Addition Error handling for multi level paths. (currently supports 1 path deep and back to top options.)
