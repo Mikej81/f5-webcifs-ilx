@@ -8,7 +8,10 @@ F5 BIG-IP iRulesLX (Unsupported) Project for Webified CIFS Shares.
 Currently supports SMB2:ReadDir, SMB2:ReadFile, SMB2:WriteFile
 
 Modified SMB2 Library to allow additional file attriute return for SMB2::READDIR
--Currently able to return FILE_ATTRIBUTES to determine FILE VS Directory.
+
+-EndofFile: File Size on Disk (UInt64 to Hex, to Binary, to Bytes.)
+
+-CreationDate: File Creation Date (UInt64 to Int32, to Hex, to Binary, to Java GMT.)
 
 ##TODO:
 -NFS Support?
