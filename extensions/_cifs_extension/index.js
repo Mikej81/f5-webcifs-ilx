@@ -1,11 +1,14 @@
+//  Webified CIFS
+//  Michael Coleman
+//  Michael@f5.com
 var express = require('express');
 var app = express();
 var server = require('http').Server(app);
 var SMB2 = require('smb2');
 var multer = require('multer');
-var bcdDate = require('bcd-date');
-var Int64BE = require("int64-buffer").Int64BE;
-var Uint64BE = require("int64-buffer").Uint64BE;
+var hexToBinary = require('hex-to-binary');
+var Long = require("long");
+var bodyParser = require('body-parser')
 var storage = multer.memoryStorage();
 var upload = multer({ storage: storage });
 
@@ -13,6 +16,10 @@ server.listen({
     host: '127.0.0.1', 
     port: 1112
 });
+// parse application/x-www-form-urlencoded 
+app.use(bodyParser.urlencoded({ extended: false }))
+// parse application/json 
+app.use(bodyParser.json())
 
 app.get('*', function (req, res) {
 	//Set up to allow dynamic Shares and SSO
@@ -29,7 +36,7 @@ app.get('*', function (req, res) {
   		var sharePass = decodeURIComponent(req.query.password);
     } else {
   		//Static Connection Options
-  		var shareHost = '192.168.51.136';
+  		var shareHost = '192.168.51.137';
   		var sharePath = 'SHARE';
   		//This is a standalone Win7 Box, Match to AD DOMAIN if domain server
   		var shareDomain = 'WIN-4KDIFNTK7S'; 
@@ -57,12 +64,12 @@ app.get('*', function (req, res) {
          password: sharePass
         });
 		var http_resp = "<html><head><style> body { background-color: black; color: white; } ";
-		http_resp += "table { border: 2px solid #33ccff; padding: 10px 40px; float: left; width: 50%; background: #000000; border-radius: 15px; font-size: 16px; } ";
+		http_resp += "table { border: 2px solid #33ccff; padding: 10px 40px; float: left; width: 1024px; background: #000000; border-radius: 15px; font-size: 16px; } ";
 	    http_resp += "a { color: white; } ";
 	    http_resp += "tr.border_bottom td { border-bottom: 2pt solid #66b3ff; }</style></head>";
 	    http_resp += "<body>";
-        http_resp += "<table><tr class='border_bottom'><td>CIFS://" + shareHost + "/" + sharePath + "</td></tr>";
-        http_resp += "<tr class='border_bottom'><td>File Upload<br><br>";
+        http_resp += "<table><tr class='border_bottom'><td colspan=3>CIFS://" + shareHost + "/" + sharePath + "</td></tr>";
+        http_resp += "<tr class='border_bottom'><td colspan=3>File Upload<br><br>";
     if (req.query.upfile != null && req.query.uploadstatus != null) {
     	var httpfilename = decodeURIComponent(req.query.upfile);
     	var httpuploadstatus = decodeURIComponent(req.query.uploadstatus);
@@ -70,8 +77,8 @@ app.get('*', function (req, res) {
     	http_resp += "<b>Filename: </b>" + httpfilename + "<br></div><br>";
     }
     http_resp += "<form method='post' enctype='multipart/form-data'><input type='file' name='file' accept='*'><input type='submit'></form>";
-    http_resp += "</td></tr><tr class='border_bottom'><td>Directory Listing</td></tr>";
-    //http_resp += '<tr><td>Name</td><td></td></tr>';
+    http_resp += "</td></tr><tr class='border_bottom'><td colspan=3>Directory Listing</td></tr>";
+    http_resp += "<tr class='border_bottom'><td>Name</td><td>Size (B)</td><td>Creation Date</td></tr>";
     
     try {
     	var options = req.url;
@@ -93,30 +100,38 @@ app.get('*', function (req, res) {
       	//Need to add ability to read multiple levels deep, cant get format right...
         smb2Client.readdir(flip_path, function(err, files) {
 
-        	http_resp += '<tr><td><a href="/">..</a></td></tr>';
+        	http_resp += '<tr><td><a href="/">..</a></td><td></td></tr>';
+        	var file_resp, folder_resp;
     
     for (var i = 0, len = files.length; i < len; i++) {
       if (files[i] !== null) {
       	if (/(?=\w+\.\w{3,4}$).+/.test(files[i]) || files[i].FileAttributes.toString(16) !== '10') {
-          var sizebuffer = new Buffer(files[i].AllocationSize);
-          var big = new Uint64BE(sizebuffer); // a big number with 64 bits 
-          console.log(big);
-          var filedec = parseInt(big.toNumber(), 2);
-          var filestr = big.toString(16); 
-          console.log(filedec);
-          console.log(filestr);
+          //Convert MS LARGE INTEGER UInt64 to File size in Bytes
+          var size_split = files[i].EndofFile.toString('hex').match(/.{1,2}/g).reverse().join("");
+          var hexBin = hexToBinary(size_split);
+          var fileSize = parseInt(hexBin, 2)
+          //Convert MS FILETIME to Java DateTime
+          var time_split = files[i].CreationTime.toString('hex').match(/.{1,2}/g).reverse().join("");
+          var timeBin = hexToBinary(time_split);
+          var filetime = parseInt(timeBin, 2);
+          //console.log(filetime);
+          	var msFiletime=filetime;
+			var sec=Math.round(msFiletime/10000000);
+			sec -= 11644473600;
+			var datum = new Date(sec*1000);
+			//console.log(datum.toGMTString());
 
-          http_resp += '<tr><td><a href="?share=' + sharePath + '&path=' + flip_path + '&filename=' + files[i].Filename + '">' + files[i].Filename + '</a></td></tr>';
-      	  //console.log(files[i].Filename + ' : ' + files[i].FileAttributes.toString(16));
-          //console.log(files[i].Filename + ' : ' + files[i].FileAttributes.toString(16));
+          file_resp += '<tr><td><a href="?share=' + sharePath + '&path=' + flip_path + '&filename=' + files[i].Filename + '">' + files[i].Filename + '</a></td><td>' + fileSize + '</td><td>' + datum.toGMTString() + '</td></tr>';
         } else {
           if ((files[i].Filename.indexOf('.') || files[i].Filename.indexOf('..')) && files[i].Filename.length > 2) {
-      		http_resp += '<tr><td><a href="?share=' + sharePath + '&path=' + flip_path + '/' + files[i].Filename + '">[ ' + files[i].Filename + ' ]</a></td></tr>';
+      		folder_resp += '<tr><td><a href="?share=' + sharePath + '&path=' + flip_path + '/' + files[i].Filename + '">[ ' + files[i].Filename + ' ]</a></td><td></td><td></td></tr>';
       	  //console.log(files[i].FileAttributes.toString(16));
         }
         }
       }
       }
+        http_resp += folder_resp;
+        http_resp += file_resp;
         http_resp += '</table></body></html>';
         res.send(http_resp);
       });
@@ -165,15 +180,34 @@ app.get('*', function (req, res) {
 });
 app.post('/', upload.single('file'), function(req,res) {
 	//POST FILE
-	 //console.log(req.file);
+		//Set up to allow dynamic Shares and SSO
+  	if (req.body.host && 
+      req.body.share && 
+      req.body.domain && 
+      req.body.username && 
+      req.body.password) {
+  		console.log('this passed somehow');
+  		var shareHost = decodeURIComponent(req.body.host);
+  		var sharePath = decodeURIComponent(req.body.share);
+  		var shareDomain = decodeURIComponent(req.body.domain);
+  		var shareUser = decodeURIComponent(req.body.username);
+  		var sharePass = decodeURIComponent(req.body.password);
+    } else {
+  		//Static Connection Options
+  		var shareHost = '192.168.51.137';
+  		var sharePath = 'SHARE';
+  		//This is a standalone Win7 Box, Match to AD DOMAIN if domain server
+  		var shareDomain = 'WIN-4KDIFNTK7S'; 
+  		var shareUser = 'administrator';
+  		var sharePass = 'pass@word1';
+    }
 
 	 var smb2Client = new SMB2({
          share:'\\\\' + shareHost + '\\' + sharePath,
          domain: shareDomain,
          username: shareUser,
          password: sharePass,
-     autoCloseTimeout: 100000,
-     debug: true
+     autoCloseTimeout: 100000
     });
 
     smb2Client.writeFile(req.file.originalname, req.file.buffer, {'encoding': null}, function (err) {
