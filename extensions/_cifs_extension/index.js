@@ -13,31 +13,35 @@ server.listen({
 
 app.get('*', function (req, res) {
 	//Set up to allow dynamic Shares and SSO
-	if (req.query.host && req.query.share && req.query.domain && req.query.username && req.query.password) {
-		console.log('this passed somehow');
-		var shareHost = decodeURIComponent(req.query.host);
-		var sharePath = decodeURIComponent(req.query.share);
-		var shareDomain = decodeURIComponent(req.query.domain);
-		var shareUser = decodeURIComponent(req.query.username);
-		var sharePass = decodeURIComponent(req.query.password);
+  	if (req.query.host && 
+      req.query.share && 
+      req.query.domain && 
+      req.query.username && 
+      req.query.password) {
+  		console.log('this passed somehow');
+  		var shareHost = decodeURIComponent(req.query.host);
+  		var sharePath = decodeURIComponent(req.query.share);
+  		var shareDomain = decodeURIComponent(req.query.domain);
+  		var shareUser = decodeURIComponent(req.query.username);
+  		var sharePass = decodeURIComponent(req.query.password);
     } else {
-		//Static Connection Options
-		var shareHost = '192.168.51.132';
-		var sharePath = 'SHARE';
-		//This is a standalone Win7 Box, Match to AD DOMAIN if domain server
-		var shareDomain = 'WIN-4KDIFNTK7S'; 
-		var shareUser = 'administrator';
-		var sharePass = 'pass@word1';
+  		//Static Connection Options
+  		var shareHost = '192.168.51.136';
+  		var sharePath = 'SHARE';
+  		//This is a standalone Win7 Box, Match to AD DOMAIN if domain server
+  		var shareDomain = 'WIN-4KDIFNTK7S'; 
+  		var shareUser = 'administrator';
+  		var sharePass = 'pass@word1';
     }
 
     console.log('Connection: //' + shareHost + '//' + sharePath + ' ' + shareDomain + ' user: ' + shareUser + ' pass: ' + sharePass);
     var file_query = '';
     if (req.query.filename == null) {
     	file_query = req.url;
-    	console.log('no file: ' + file_query);
+    	//console.log('no file: ' + file_query);
     } else {
     	file_query = decodeURIComponent(req.query.filename);
-    	console.log('its a file: ' + file_query);
+    	//console.log('its a file: ' + file_query);
     }
 
 	//if (!/(?=\w+\.\w{3,4}$).+/.test(file_query)) {
@@ -73,9 +77,6 @@ app.get('*', function (req, res) {
       	var share_len = sharePath.length;
       	var uri_len = options_dec.length;
       	var tmp_share = '/' + sharePath;
-      	//ADD Better math for share path length...
-      	//var strip_path = options_dec.substr(tmp_share.length);
-      	//var flip_path = strip_path.replace(/\//g, "");
       	var dir_path = '';
       	var flip_path = '';
 
@@ -110,22 +111,16 @@ app.get('*', function (req, res) {
       smb2Client.close();
 	} else {
       //THIS IS A FILE, DOWNLOAD THAT SHIZ!
-      //Currently only set up for 1 level deep, so it needs some work.
-      //var options = req.url;
-      //var options_dec = decodeURIComponent(options);
-      //var options_split = options_dec.split('/');
-      //var share = options_split[1];
-      //var tmp_path = options_split[2];
-      //var tmp_name = options_split[3];
-      //if (!tmp_name) {
-      //  var name = tmp_path;
-      //  var path = '';
-      //}
+      var dnow = new Date();
+      var dnowString = dnow.toDateString();
 
       var dpath = decodeURIComponent(req.query.path);
+      if (dpath){
+        dpath += '\\';
+      }
       var dname = decodeURIComponent(req.query.filename);
 
-      console.log('downloading: ' + dpath + dname);
+      console.log('[ ' + dnowString + ' WEBCIFS USER: ' + shareUser +' Downloading: ' + dpath + dname + ']');
     
     var smb2Client = new SMB2({
          share:'\\\\' + shareHost + '\\' + sharePath,
