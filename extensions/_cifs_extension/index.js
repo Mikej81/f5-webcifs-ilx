@@ -36,15 +36,17 @@ app.get('*', function (req, res) {
   		var sharePass = decodeURIComponent(req.query.password);
     } else {
   		//Static Connection Options
-  		var shareHost = '192.168.51.137';
+  		var shareHost = '192.168.51.136';
   		var sharePath = 'SHARE';
   		//This is a standalone Win7 Box, Match to AD DOMAIN if domain server
   		var shareDomain = 'WIN-4KDIFNTK7S'; 
   		var shareUser = 'administrator';
   		var sharePass = 'pass@word1';
     }
+      var cnow = new Date();
+      var cnowString = cnow.toDateString();
 
-    console.log('Connection: //' + shareHost + '//' + sharePath + ' ' + shareDomain + ' user: ' + shareUser + ' pass: ' + sharePass);
+    console.log(cnowString + ' SMB2::Connection: //' + shareHost + '//' + sharePath + ' ' + shareDomain + ' user: ' + shareUser );
     var file_query = '';
     if (req.query.filename == null) {
     	file_query = req.url;
@@ -63,6 +65,7 @@ app.get('*', function (req, res) {
          username: shareUser,
          password: sharePass
         });
+
 		var http_resp = "<html><head><style> body { background-color: black; color: white; } ";
 		http_resp += "table { border: 2px solid #33ccff; padding: 10px 40px; float: left; width: 1024px; background: #000000; border-radius: 15px; font-size: 16px; } ";
 	    http_resp += "a { color: white; } ";
@@ -70,12 +73,14 @@ app.get('*', function (req, res) {
 	    http_resp += "<body>";
         http_resp += "<table><tr class='border_bottom'><td colspan=3>CIFS://" + shareHost + "/" + sharePath + "</td></tr>";
         http_resp += "<tr class='border_bottom'><td colspan=3>File Upload<br><br>";
-    if (req.query.upfile != null && req.query.uploadstatus != null) {
-    	var httpfilename = decodeURIComponent(req.query.upfile);
-    	var httpuploadstatus = decodeURIComponent(req.query.uploadstatus);
-    	http_resp += "<div style='background-color:green;'><b>Upload Status: </b>" + httpuploadstatus + "<br>";
-    	http_resp += "<b>Filename: </b>" + httpfilename + "<br></div><br>";
-    }
+
+	    if (req.query.upfile != null && req.query.uploadstatus != null) {
+	    	var httpfilename = decodeURIComponent(req.query.upfile);
+	    	var httpuploadstatus = decodeURIComponent(req.query.uploadstatus);
+	    	http_resp += "<div style='background-color:green;'><b>Upload Status: </b>" + httpuploadstatus + "<br>";
+	    	http_resp += "<b>Filename: </b>" + httpfilename + "<br></div><br>";
+	    }
+
     http_resp += "<form method='post' enctype='multipart/form-data'><input type='file' name='file' accept='*'><input type='submit'></form>";
     http_resp += "</td></tr><tr class='border_bottom'><td colspan=3>Directory Listing</td></tr>";
     http_resp += "<tr class='border_bottom'><td>Name</td><td>Size (B)</td><td>Creation Date</td></tr>";
@@ -84,9 +89,10 @@ app.get('*', function (req, res) {
     	var options = req.url;
       	var options_dec = decodeURIComponent(options);
 
-      	var share_len = sharePath.length;
-      	var uri_len = options_dec.length;
-      	var tmp_share = '/' + sharePath;
+      	//var share_len = sharePath.length;
+      	//var uri_len = options_dec.length;
+      	//var tmp_share = '/' + sharePath;
+      	
       	var dir_path = '';
       	var flip_path = '';
 
@@ -101,21 +107,21 @@ app.get('*', function (req, res) {
         smb2Client.readdir(flip_path, function(err, files) {
 
         	http_resp += '<tr><td><a href="/">..</a></td><td></td></tr>';
-        	var file_resp, folder_resp;
+        var file_resp = '';
+        var folder_resp = '';
     
     for (var i = 0, len = files.length; i < len; i++) {
       if (files[i] !== null) {
       	if (/(?=\w+\.\w{3,4}$).+/.test(files[i]) || files[i].FileAttributes.toString(16) !== '10') {
-          //Convert MS LARGE INTEGER UInt64 to File size in Bytes
-          var size_split = files[i].EndofFile.toString('hex').match(/.{1,2}/g).reverse().join("");
-          var hexBin = hexToBinary(size_split);
-          var fileSize = parseInt(hexBin, 2)
-          //Convert MS FILETIME to Java DateTime
-          var time_split = files[i].CreationTime.toString('hex').match(/.{1,2}/g).reverse().join("");
-          var timeBin = hexToBinary(time_split);
-          var filetime = parseInt(timeBin, 2);
-          //console.log(filetime);
-          	var msFiletime=filetime;
+			//Convert MS LARGE INTEGER UInt64 to File size in Bytes
+			var size_split = files[i].EndofFile.toString('hex').match(/.{1,2}/g).reverse().join("");
+			var hexBin = hexToBinary(size_split);
+			var fileSize = parseInt(hexBin, 2)
+			//Convert MS FILETIME to Java DateTime
+			var time_split = files[i].CreationTime.toString('hex').match(/.{1,2}/g).reverse().join("");
+			var timeBin = hexToBinary(time_split);
+			var filetime = parseInt(timeBin, 2);
+			var msFiletime=filetime;
 			var sec=Math.round(msFiletime/10000000);
 			sec -= 11644473600;
 			var datum = new Date(sec*1000);
@@ -136,7 +142,7 @@ app.get('*', function (req, res) {
         res.send(http_resp);
       });
     } catch(e){
-      console.log(e);
+      //console.log(e);
       res.send(err);
     }
       smb2Client.close();
@@ -194,7 +200,7 @@ app.post('/', upload.single('file'), function(req,res) {
   		var sharePass = decodeURIComponent(req.body.password);
     } else {
   		//Static Connection Options
-  		var shareHost = '192.168.51.137';
+  		var shareHost = '192.168.51.136';
   		var sharePath = 'SHARE';
   		//This is a standalone Win7 Box, Match to AD DOMAIN if domain server
   		var shareDomain = 'WIN-4KDIFNTK7S'; 
