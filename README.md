@@ -17,7 +17,8 @@ var hexToBinary = require('hex-to-binary');
 var Long = require("long");
 var bodyParser = require('body-parser');
 var storage = multer.memoryStorage();
-var upload = multer({ storage: storage });```
+var upload = multer({ storage: storage });
+```
 
 Interface:
 
