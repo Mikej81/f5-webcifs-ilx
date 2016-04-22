@@ -8,7 +8,7 @@ var SMB2 = require('smb2');
 var multer = require('multer');
 var hexToBinary = require('hex-to-binary');
 var Long = require("long");
-var bodyParser = require('body-parser')
+var bodyParser = require('body-parser');
 var storage = multer.memoryStorage();
 var upload = multer({ storage: storage });
 
