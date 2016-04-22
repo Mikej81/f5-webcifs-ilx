@@ -3,6 +3,21 @@
 
 F5 BIG-IP iRulesLX (Unsupported) Project for Webified CIFS Shares.
 
+The SMB2 library has been modified for this project.
+
+Dependencies:
+
+```var express = require('express');
+var app = express();
+var server = require('http').Server(app);
+var SMB2 = require('smb2');
+var multer = require('multer');
+var hexToBinary = require('hex-to-binary');
+var Long = require("long");
+var bodyParser = require('body-parser')
+var storage = multer.memoryStorage();
+var upload = multer({ storage: storage });```
+
 Interface:
 
 ![alt tag](http://i.imgur.com/M447vvdl.png)
