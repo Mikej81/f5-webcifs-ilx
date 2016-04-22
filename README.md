@@ -3,7 +3,14 @@
 
 F5 BIG-IP iRulesLX (Unsupported) Project for Webified CIFS Shares.
 
-![alt tag](http://i.imgur.com/7oO4D8xm.png)
+Interface:
+![alt tag](http://i.imgur.com/M447vvdl.png)
+
+Directory Browsing:
+![alt tag](http://i.imgur.com/isXT1Ckl.png)
+
+Logging:
+![alt tag](http://i.imgur.com/u3QnVO6l.png)
 
 Currently supports SMB2:ReadDir, SMB2:ReadFile, SMB2:WriteFile
 
@@ -13,6 +20,8 @@ Modified SMB2 Library to allow additional file attriute return for SMB2::READDIR
 
 -CreationDate: File Creation Date (UInt64 to Int32, to Hex, to Binary, to Java GMT.)
 
+-QueryStrings & Form Fields can be passed for connection settings.
+
 ##TODO:
 -NFS Support?
 
@@ -21,5 +30,7 @@ Modified SMB2 Library to allow additional file attriute return for SMB2::READDIR
 -Rename, 
 
 -additional error handling, 
+
+-add more intelligence to QueryString and Form Field settings,
 
 -Addition Error handling for multi level paths. (currently supports 1 path deep and back to top options.)
