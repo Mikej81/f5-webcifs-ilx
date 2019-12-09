@@ -20,15 +20,15 @@ var storage = multer.memoryStorage();
 var upload = multer({ storage: storage });
 ```
 
-Interface:
+### Interface:
 
 ![alt tag](http://i.imgur.com/M447vvdl.png)
 
-Directory Browsing:
+### Directory Browsing:
 
 ![alt tag](http://i.imgur.com/isXT1Ckl.png)
 
-Logging:
+### Logging:
 
 ![alt tag](http://i.imgur.com/u3QnVO6l.png)
 
