@@ -40,7 +40,9 @@ Modified SMB2 Library to allow additional file attriute return for SMB2::READDIR
 
 -CreationDate: File Creation Date (UInt64 to Int32, to Hex, to Binary, to Java GMT.)
 
--QueryStrings & Form Fields can be passed for connection settings.
+-APM Session Vars, QueryStrings, Form Fields can be passed for connection settings.
+
+-Added Streaming Profile Support.
 
 ##TODO:
 -NFS Support?
@@ -50,7 +52,5 @@ Modified SMB2 Library to allow additional file attriute return for SMB2::READDIR
 -Rename, 
 
 -additional error handling, 
-
--add more intelligence to QueryString and Form Field settings,
 
 -Addition Error handling for multi level paths. (currently supports 1 path deep and back to top options.)
