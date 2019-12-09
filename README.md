@@ -36,21 +36,21 @@ Currently supports SMB2:ReadDir, SMB2:ReadFile, SMB2:WriteFile
 
 Modified SMB2 Library to allow additional file attriute return for SMB2::READDIR
 
--EndofFile: File Size on Disk (UInt64 to Hex, to Binary, to Bytes.)
+* EndofFile: File Size on Disk (UInt64 to Hex, to Binary, to Bytes.)
 
--CreationDate: File Creation Date (UInt64 to Int32, to Hex, to Binary, to Java GMT.)
+* CreationDate: File Creation Date (UInt64 to Int32, to Hex, to Binary, to Java GMT.)
 
--APM Session Vars, QueryStrings, Form Fields can be passed for connection settings.
+* APM Session Vars, QueryStrings, Form Fields can be passed for connection settings.
 
--Added Streaming Profile Support.
+* Added Streaming Profile Support.
 
 ##TODO:
--NFS Support?
+* NFS Support?
 
--MkDir, 
+* MkDir, 
 
--Rename, 
+* Rename, 
 
--additional error handling, 
+* additional error handling, 
 
--Addition Error handling for multi level paths. (currently supports 1 path deep and back to top options.)
+* Addition Error handling for multi level paths. (currently supports 1 path deep and back to top options.)
