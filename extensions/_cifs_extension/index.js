@@ -1,48 +1,91 @@
 //  Webified CIFS
 //  Michael Coleman
 //  Michael@f5.com
+
+var http = require('http');
+var f5 = require('f5-nodejs');
 var express = require('express');
 var app = express();
-var server = require('http').Server(app);
 var SMB2 = require('smb2');
 var multer = require('multer');
+var storage = multer.memoryStorage();
+var upload = multer({ storage: storage });
+var url_ops = require('url');
+var qs = require('querystring');
+var session = require('express-session');
+var util = require('util');
 var hexToBinary = require('hex-to-binary');
 var Long = require("long");
 var bodyParser = require('body-parser');
-var storage = multer.memoryStorage();
-var upload = multer({ storage: storage });
 
-server.listen({
-    host: '127.0.0.1', 
-    port: 1112
+
+app.use(session({
+  secret: 'ilx-secret-phrase',
+  name: 'ilx_webcifs',
+  resave: true,
+  saveUninitialized: true
+}));
+
+var plugin = new f5.ILXPlugin();
+plugin.startHttpServer(app);
+//console.log("Server Started.");
+
+var sess;
+
+app.get('/favicon.ico', function(req, res) {
 });
-// parse application/x-www-form-urlencoded 
-app.use(bodyParser.urlencoded({ extended: false }))
-// parse application/json 
-app.use(bodyParser.json())
 
 app.get('*', function (req, res) {
+    
+        var url_parts = url_ops.parse(req.url, true, true);
+        // hostname is used for composition of the links for page object.
+        // relative link in the <href> tag did not work.  I had to create absolute links including 
+        // the hostname.
+
+    url=url_parts.pathname;
+    
 	//Set up to allow dynamic Shares and SSO
-  	if (req.query.host && 
-      req.query.share && 
-      req.query.domain && 
-      req.query.username && 
-      req.query.password) {
-  		console.log('this passed somehow');
-  		var shareHost = decodeURIComponent(req.query.host);
-  		var sharePath = decodeURIComponent(req.query.share);
-  		var shareDomain = decodeURIComponent(req.query.domain);
-  		var shareUser = decodeURIComponent(req.query.username);
-  		var sharePass = decodeURIComponent(req.query.password);
+	if ( req.session.domain) {
+        shareDomain=req.session.domain;
+        sharePath=req.session.sharepath;
+        shareHost=req.session.winhost;
+        shareUser=req.session.user;
+        sharePass=req.session.pass;
+        console.log ('session vars:-', req.session.domain,'-',req.session.sharepath, '-',req.session.winhost);
     } else {
-  		//Static Connection Options
-  		var shareHost = '192.168.51.136';
-  		var sharePath = 'SHARE';
-  		//This is a standalone Win7 Box, Match to AD DOMAIN if domain server
-  		var shareDomain = 'WIN-4KDIFNTK7S'; 
-  		var shareUser = 'administrator';
-  		var sharePass = 'pass@word1';
+        shareDomain=url_parts.query.domain;
+        sharePath=url_parts.query.sharepath;
+        shareHost=url_parts.query.winhost;
+        shareUser=url_parts.query.user;
+        sharePass=url_parts.query.pass;
+        
+        req.session.domain = shareDomain;
+        req.session.sharepath = sharePath;
+        req.session.winhost = shareHost;
+        req.session.user = shareUser;
+        req.session.pass = sharePass;
+        console.log ('Query vars:', req.session.domain,'-',req.session.sharepath, '-',req.session.winhost,'-', req.session.user, '-', req.session.pass);
     }
+  	//if (req.query.host && 
+    //  req.query.share && 
+    //  req.query.domain && 
+    //  req.query.username && 
+    //  req.query.password) {
+
+  	//	var shareHost = decodeURIComponent(req.query.host);
+  	//	var sharePath = decodeURIComponent(req.query.share);
+  	//	var shareDomain = decodeURIComponent(req.query.domain);
+  	//	var shareUser = decodeURIComponent(req.query.username);
+  	//	var sharePass = decodeURIComponent(req.query.password);
+    // } else {
+  		//Static Connection Options
+  		//var shareHost = '192.168.51.136';
+  		//var sharePath = 'SHARE';
+  		//This is a standalone Win7 Box, Match to AD DOMAIN if domain server
+  		//var shareDomain = 'WIN-4KDIFNTK7S'; 
+  		//var shareUser = 'administrator';
+  		//var sharePass = 'pass@word1';
+    // }
       var cnow = new Date();
       var cnowString = cnow.toDateString();
 
@@ -116,7 +159,7 @@ app.get('*', function (req, res) {
 			//Convert MS LARGE INTEGER UInt64 to File size in Bytes
 			var size_split = files[i].EndofFile.toString('hex').match(/.{1,2}/g).reverse().join("");
 			var hexBin = hexToBinary(size_split);
-			var fileSize = parseInt(hexBin, 2)
+			var fileSize = parseInt(hexBin, 2);
 			//Convert MS FILETIME to Java DateTime
 			var time_split = files[i].CreationTime.toString('hex').match(/.{1,2}/g).reverse().join("");
 			var timeBin = hexToBinary(time_split);
@@ -181,8 +224,7 @@ app.get('*', function (req, res) {
         }
         smb2Client.close();
       });
-	};
-
+	}
 });
 app.post('/', upload.single('file'), function(req,res) {
 	//POST FILE
