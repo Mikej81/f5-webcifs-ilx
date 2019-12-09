@@ -3,7 +3,7 @@
 
 F5 BIG-IP iRulesLX (Unsupported) Project for Webified CIFS Shares.
 
-The SMB2 library has been modified for this project.
+The SMB2 library has been modified for this project: https://github.com/Mikej81/node-smb2
 
 Dependencies:
 
