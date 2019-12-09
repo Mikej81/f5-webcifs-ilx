@@ -45,6 +45,8 @@ Modified SMB2 Library to allow additional file attriute return for SMB2::READDIR
 * Added Streaming Profile Support.
 
 ## TODO:
+* Linting, Cleanup
+
 * NFS Support?
 
 * MkDir, 
