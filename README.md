@@ -1,5 +1,5 @@
 # ILXWebCifs
-##iRuleLX Webified CIFS Project
+## iRuleLX Webified CIFS Project
 
 F5 BIG-IP iRulesLX (Unsupported) Project for Webified CIFS Shares.
 
@@ -44,7 +44,7 @@ Modified SMB2 Library to allow additional file attriute return for SMB2::READDIR
 
 * Added Streaming Profile Support.
 
-##TODO:
+## TODO:
 * NFS Support?
 
 * MkDir, 
